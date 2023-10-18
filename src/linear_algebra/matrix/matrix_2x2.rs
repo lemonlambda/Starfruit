@@ -30,6 +30,26 @@ macro_rules! op_impl {
     }
 }
 
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "nightly")] {
+        #[macro_export]
+        macro_rules! matrix2x2 {
+            ($i1:tt $i2:tt; $i3:tt $i4:tt) => {
+                #[allow(unused_parens)]
+                Matrix2x2::new(Vector2::new($i1, $i2, VectorType::Row), Vector2::new($i3, $i4, VectorType::Row))
+            }
+        }
+    } else {
+        #[macro_export]
+        macro_rules! matrix2x2 {
+            ($i1:tt $i2:tt; $i3:tt $i4:tt) => {
+                Matrix2x2::new(Vector2::new($i1, $i2, VectorType::Row), Vector2::new($i3, $i4, VectorType::Row))
+            }
+        }
+    }
+}
+
 op_impl!(Add +, Sub -, Mul *, Div /);
 
 #[cfg(test)]
@@ -44,6 +64,11 @@ mod tests {
         assert_eq!(matrix - 10, Matrix2x2::new(Vector2::new(0, 10, VectorType::Row), Vector2::new(20, 30, VectorType::Row)));
         assert_eq!(matrix * 10, Matrix2x2::new(Vector2::new(100, 200, VectorType::Row), Vector2::new(300, 400, VectorType::Row)));
         assert_eq!(matrix / 10, Matrix2x2::new(Vector2::new(1, 2, VectorType::Row), Vector2::new(3, 4, VectorType::Row)));
+    }
+
+    #[test]
+    fn matrix_macro() {
+        assert_eq!(matrix2x2!((20 - 10) 20; 30 40), Matrix2x2::new(Vector2::new(10, 20, VectorType::Row), Vector2::new(30, 40, VectorType::Row)));
     }
 
     #[test]
