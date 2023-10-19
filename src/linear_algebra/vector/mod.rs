@@ -6,5 +6,5 @@ pub mod vector_n;
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VectorType {
     Row,
-    Column
+    Column,
 }
