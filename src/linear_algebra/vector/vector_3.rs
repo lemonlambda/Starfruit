@@ -1,4 +1,5 @@
 use super::VectorType;
+use crate::linear_algebra::matrix::matrix_3x3::Matrix3x3;
 
 use std::fmt::{Display, Formatter, Error};
 
@@ -32,15 +33,43 @@ impl<T: Display> Display for Vector3<T> {
     }
 }
 
+cfg_if::cfg_if! {
+    if #[cfg(feature = "nightly")] {
+        #[macro_export]
+        macro_rules! vec3 {
+            ($i1:tt $i2:tt $i3:tt) => {
+                #[allow(unused_parens)]
+                Vector3::new($i1, $i2, $i3, VectorType::Row)
+            }
+        }
+        pub(crate) use vec3;
+    } else {
+        #[macro_export]
+        macro_rules! vec3 {
+            ($i1:tt $i2:tt $i3:tt) => {
+                Vector3::new($i1, $i2, $i3, VectorType::Row)
+            }
+        }
+        pub(crate) use vec3;
+    }
+}
+
 macro_rules! op_impl {
     ($($op:ident $operator:tt),*) => {
         ::paste::paste! {
             $(
-                impl<U: Copy, T: Copy + ::std::ops::$op<U, Output = T>> ::std::ops::$op<U> for Vector3<T> {
+                impl<T: Copy + ::std::ops::$op<T, Output = T>> ::std::ops::$op<T> for Vector3<T> {
                     type Output = Vector3<T>;
             
-                    fn [<$op:lower>](self, rhs: U) -> Self::Output {
+                    fn [<$op:lower>](self, rhs: T) -> Self::Output {
                         Vector3::new(self.storage[0] $operator rhs, self.storage[1] $operator rhs, self.storage[2] $operator rhs, self.vector_type)
+                    }
+                }
+                impl<T: Copy + ::std::ops::$op<Vector3<T>, Output = Vector3<T>>> ::std::ops::$op<Vector3<T>> for Vector3<T> {
+                    type Output = Matrix3x3<T>;
+
+                    fn [<$op:lower>](self, rhs: Vector3<T>) -> Self::Output {
+                        Matrix3x3::new(self.storage[0] $operator rhs, self.storage[1] $operator rhs, self.storage[2] $operator rhs)
                     }
                 }
             )*

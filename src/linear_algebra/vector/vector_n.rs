@@ -40,14 +40,20 @@ macro_rules! op_impl {
     ($($op:ident $operator:tt),*) => {
         ::paste::paste! {
             $(
-                impl<U: Copy, T: Copy + ::std::ops::$op<U, Output = T>> ::std::ops::$op<U> for VectorN<T> {
+                impl<T: Copy + ::std::ops::$op<T, Output = T>> ::std::ops::$op<T> for VectorN<T> {
                     type Output = VectorN<T>;
             
-                    fn [<$op:lower>](self, rhs: U) -> Self::Output {
-                        let result = self.storage.iter().map(|x| *x $operator rhs).collect::<Vec<_>>();
-                        VectorN::new(result, self.vector_type)
+                    fn [<$op:lower>](self, rhs: T) -> Self::Output {
+                        VectorN::new(self.storage.iter().map(|x| *x $operator rhs).collect::<Vec<_>>(), self.vector_type)
                     }
                 }
+                // impl<T: Copy + ::std::ops::$op<VectorN<T>, Output = VectorN<T>>> ::std::ops::$op<VectorN<T>> for VectorN<T> {
+                //     type Output = MatrixNxN<T>;
+
+                //     fn [<$op:lower>](self, rhs: VectorN<T>) -> Self::Output {
+                //         MatrixNxN::new(self.storage[0] $operator rhs, self.storage[1] $operator rhs)
+                //     }
+                // }
             )*
         }
     }

@@ -36,19 +36,46 @@ macro_rules! op_impl {
     ($($op:ident $operator:tt),*) => {
         ::paste::paste! {
             $(
-                impl<U: Copy, T: Copy + ::std::ops::$op<U, Output = T>> ::std::ops::$op<U> for Vector4<T> {
+                impl<T: Copy + ::std::ops::$op<T, Output = T>> ::std::ops::$op<T> for Vector4<T> {
                     type Output = Vector4<T>;
             
-                    fn [<$op:lower>](self, rhs: U) -> Self::Output {
+                    fn [<$op:lower>](self, rhs: T) -> Self::Output {
                         Vector4::new(self.storage[0] $operator rhs, self.storage[1] $operator rhs, self.storage[2] $operator rhs, self.storage[3] $operator rhs, self.vector_type)
                     }
                 }
+                // impl<T: Copy + ::std::ops::$op<Vector4<T>, Output = Vector4<T>>> ::std::ops::$op<Vector4<T>> for Vector4<T> {
+                //     type Output = Matrix4x4<T>;
+
+                //     fn [<$op:lower>](self, rhs: Vector4<T>) -> Self::Output {
+                //         Matrix4x4::new(self.storage[0] $operator rhs, self.storage[1] $operator rhs)
+                //     }
+                // }
             )*
         }
     }
 }
-
 op_impl!(Add +, Sub -, Mul *, Div /);
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "nightly")] {
+        #[macro_export]
+        macro_rules! vec4 {
+            ($i1:tt $i2:tt $i3:tt $i4:tt) => {
+                #[allow(unused_parens)]
+                Vector4::new($i1, $i2, $i3, $i4, VectorType::Row)
+            }
+        }
+        pub(crate) use vec4;
+    } else {
+        #[macro_export]
+        macro_rules! vec4 {
+            ($i1:tt $i2:tt $i3:tt $i4:tt) => {
+                Vector4::new($i1, $i2, $i3, $i4, VectorType::Row)
+            }
+        }
+        pub(crate) use vec4;
+    }
+}
 
 #[cfg(test)]
 mod tests {
