@@ -1,13 +1,13 @@
 use crate::linear_algebra::vector::vector_2::Vector2;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct Matrix2x2<T> {
-    vectors: [Vector2<T>; 2]
+pub struct MatrixNxN<T> {
+    vectors: Vec<VectorN<T>>>
 }
 
 impl<T> Matrix2x2<T> {
-    pub fn new(v1: Vector2<T>, v2: Vector2<T>) -> Self {
-        assert_eq!(v1.vector_type, v2.vector_type);
+    pub fn new(rows: Vec<VectorN<T>>, v2: Vector2<T>) -> Self {
+        rows.iter().flat_map(|x| assert_eq!(x.vector_type))
         Self {
             vectors: [v1, v2]
         }
