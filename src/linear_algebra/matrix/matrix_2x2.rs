@@ -1,4 +1,7 @@
 use crate::linear_algebra::vector::vector_2::Vector2;
+use crate::linear_algebra::vector::VectorType;
+
+use std::fmt::{Display, Error, Formatter};
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct Matrix2x2<T> {
@@ -9,6 +12,64 @@ impl<T> Matrix2x2<T> {
     pub fn new(v1: Vector2<T>, v2: Vector2<T>) -> Self {
         assert_eq!(v1.vector_type, v2.vector_type);
         Self { vectors: [v1, v2] }
+    }
+}
+
+impl<T: Display> Display for Matrix2x2<T> {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), Error> {
+        fmt.write_str("┌─\n")?;
+        fmt.write_str("│")?;
+        if self.vectors[0].vector_type == VectorType::Row {
+            fmt.write_str(
+                format!(
+                    "{} {}\n",
+                    self.vectors[0].storage[0], self.vectors[0].storage[1]
+                )
+                .as_str(),
+            )?;
+            fmt.write_str(
+                format!(
+                    " {} {}│\n",
+                    self.vectors[1].storage[0], self.vectors[1].storage[1]
+                )
+                .as_str(),
+            )?;
+        } else {
+            fmt.write_str(
+                format!(
+                    "{} {}\n",
+                    self.vectors[0].storage[0], self.vectors[1].storage[0]
+                )
+                .as_str(),
+            )?;
+            fmt.write_str(
+                format!(
+                    " {} {}│\n",
+                    self.vectors[0].storage[1], self.vectors[1].storage[1]
+                )
+                .as_str(),
+            )?;
+        }
+        let length = {
+            let first = format!(
+                " {} {}\n",
+                self.vectors[1].storage[0], self.vectors[1].storage[1]
+            )
+            .len();
+            let second = format!(
+                " {} {}\n",
+                self.vectors[0].storage[0], self.vectors[1].storage[0]
+            )
+            .len();
+            if first > second {
+                first
+            } else {
+                second
+            }
+        };
+        fmt.write_str(format!("{}─┘", " ".repeat(length - 2)).as_str())?;
+
+        Ok(())
     }
 }
 
@@ -108,5 +169,14 @@ mod tests {
             Vector2::new(10, 20, VectorType::Row),
             Vector2::new(10, 20, VectorType::Column),
         );
+    }
+
+    #[test]
+    fn display() {
+        let matrix = Matrix2x2::new(
+            Vector2::new(10, 20, VectorType::Row),
+            Vector2::new(30, 40, VectorType::Row),
+        );
+        println!("{matrix}");
     }
 }
